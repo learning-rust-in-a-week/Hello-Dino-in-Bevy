@@ -3,7 +3,8 @@ use bevy_rapier2d::prelude::*;
 
 fn main() {
     App::new()
-        .add_plugins(DefaultPlugins)
+    .add_plugins(DefaultPlugins.set(
+        ImagePlugin::default_nearest()))
         .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         //.add_plugins(RapierDebugRenderPlugin::default())
         .add_systems(Startup, (setup_scene, setup_player))
@@ -39,7 +40,7 @@ fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(TransformBundle::from(Transform::from_xyz(0.0, 400.0, 0.0)))
         .insert(SpriteBundle {
             texture: asset_server.load("dino.png"),
-            transform: Transform::from_xyz(-500., 0., 500.).with_scale(Vec3::splat(2.)),
+            transform: Transform::from_xyz(-500., 0., 500.).with_scale(Vec3::splat(3.)),
             ..default()
         })
         .insert(GravityScale(60.0));
