@@ -1,12 +1,11 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
+use bevy_xpbd_2d::prelude::*;
 
 fn main() {
     App::new()
-    .add_plugins(DefaultPlugins.set(
-        ImagePlugin::default_nearest()))
-        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        //.add_plugins(RapierDebugRenderPlugin::default())
+        .add_plugins((DefaultPlugins.set(
+        ImagePlugin::default_nearest()), 
+        PhysicsPlugins::default()))
         .add_systems(Startup, (setup_scene, setup_player))
         .add_systems(Update, player_input)
         .run();
@@ -22,14 +21,18 @@ struct Score {
     pub value: u32,
 }
 
-fn setup_scene(mut commands: Commands, mut rapier_config: ResMut<RapierConfiguration>) {
+fn setup_scene(mut commands: Commands, asset_server: Res<AssetServer>) {
     // Add a camera so we can see the debug-render.
     commands.spawn(Camera2dBundle::default());
 
     // Create the ground
     commands
     .spawn(Collider::cuboid(1000.0, 50.0))
-    .insert(TransformBundle::from(Transform::from_xyz(0.0, -200.0, 0.0)));
+    .insert(TransformBundle::from(Transform::from_xyz(0.0, -200.0, 0.0)))
+    .insert(SpriteBundle {
+        texture: asset_server.load("dino.png"),
+        ..default()
+    });
 }
 
 fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
@@ -46,7 +49,12 @@ fn setup_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .insert(GravityScale(60.0));
 }
 
-fn player_input(mut velocities: Query<&mut Velocity>,
-    mut keyboard_input: ResMut<Input<KeyCode>>){
-        // here we will check if we pressed space and if we did we will add a velocity to the player
+fn player_input(mut query: Query<&mut LinearVelocity>, mut keyboard_input: ResMut<Input<KeyCode>>){
+    // here we will check if we pressed space and if we did we will add a velocity to the player
+    if keyboard_input.just_pressed(KeyCode::Space) {
+        for mut linear_velocity in query.iter_mut() {
+            linear_velocity.y += 500.0;
+        }
+        print!("jumped");
+    }
 }
